@@ -21,6 +21,39 @@ app.use(
 // In-memory хранилище для объявлений
 let items = [
 	{
+		id: 9,
+		name: "Квартира в центре",
+		description: "Просторная квартира в центре города",
+		location: "Москва",
+		type: "Недвижимость",
+		propertyType: "Квартира",
+		area: 100,
+		rooms: 3,
+		price: 15000000,
+	},
+	{
+		id: 7,
+		name: "Квартира не в центре",
+		description: "Просторная квартира не центре не города",
+		location: "Рязань",
+		type: "Недвижимость",
+		propertyType: "Квартира",
+		area: 400,
+		rooms: 6,
+		price: 12000000,
+	},
+	{
+		id: 8,
+		name: "Дом за городом",
+		description: "Просторный дом",
+		location: "Новосибирск",
+		type: "Недвижимость",
+		propertyType: "Дом",
+		area: 200,
+		rooms: 6,
+		price: 8000000,
+	},
+	{
 		id: 3,
 		name: "Квартира в центре",
 		description: "Просторная квартира в центре города",
@@ -43,12 +76,45 @@ let items = [
 		mileage: 15000,
 	},
 	{
+		id: 5,
+		name: "Haval H6",
+		description: "Надежный автомобиль",
+		location: "Новосибирск",
+		type: "Авто",
+		brand: "Haval",
+		model: "H6",
+		year: 2019,
+		mileage: 60000,
+	},
+	{
+		id: 6,
+		name: "Suzuki Swift",
+		description: "Летает в космос за литр водки",
+		location: "Новосибирск",
+		type: "Авто",
+		brand: "Suzuki",
+		model: "Swift",
+		year: 2015,
+		mileage: 110000,
+	},
+	{
 		id: 2,
 		name: "Ремонт квартир",
 		description: "Качественный ремонт квартир",
 		location: "Москва",
 		type: "Услуги",
 		serviceType: "Ремонт",
+		experience: 5,
+		cost: 50000,
+		workSchedule: "Пн-Пт, 9:00-18:00",
+	},
+	{
+		id: 4,
+		name: "Уборщица",
+		description: "Качественный ремонт квартир",
+		location: "Сочи",
+		type: "Услуги",
+		serviceType: "Уборка",
 		experience: 5,
 		cost: 50000,
 		workSchedule: "Пн-Пт, 9:00-18:00",
@@ -106,7 +172,21 @@ app.post("/items", (req, res) => {
 
 // Получение всех объявлений
 app.get("/items", (req, res) => {
-	res.json(items);
+	let { page = 1, limit = 5 } = req.query;
+	page = parseInt(page, 10); // номер страницы
+	limit = parseInt(limit, 10); // максимальное количество элементов на странице
+
+	const startIndex = (page - 1) * limit;
+	const endIndex = startIndex + limit;
+	//выбираем нужные для текущей страницы элементы
+	const paginatedItems = items.slice(startIndex, endIndex);
+
+	res.json({
+		items: paginatedItems,
+		total: items.length,
+		page,
+		totalPages: Math.ceil(items.length / limit),
+	});
 });
 
 // Получение объявления по его id

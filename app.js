@@ -76,8 +76,19 @@ let items = [
 		mileage: 15000,
 	},
 	{
+		id: 10,
+		name: "Toyota Land Cruiser",
+		description: "Надежный автомобиль",
+		location: "Москва",
+		type: "Авто",
+		brand: "Toyota",
+		model: "Land Cruiser",
+		year: 2010,
+		mileage: 200000,
+	},
+	{
 		id: 5,
-		name: "Haval H6",
+		name: "Haval H6 Квартира",
 		description: "Надежный автомобиль",
 		location: "Новосибирск",
 		type: "Авто",
@@ -110,7 +121,7 @@ let items = [
 	},
 	{
 		id: 4,
-		name: "Уборщица",
+		name: "Уборщица квартир",
 		description: "Качественный ремонт квартир",
 		location: "Сочи",
 		type: "Услуги",
@@ -170,16 +181,22 @@ app.post("/items", (req, res) => {
 	res.status(201).json(item);
 });
 
-// Получение всех объявлений
-app.get("/items", (req, res) => {
-	let { page = 1, limit = 5 } = req.query;
+// Пагинация
+const paginateItems = (page, limit, allItems) => {
 	page = parseInt(page, 10); // номер страницы
 	limit = parseInt(limit, 10); // максимальное количество элементов на странице
 
 	const startIndex = (page - 1) * limit;
 	const endIndex = startIndex + limit;
-	//выбираем нужные для текущей страницы элементы
-	const paginatedItems = items.slice(startIndex, endIndex);
+
+	return allItems.slice(startIndex, endIndex);
+};
+
+// Получение всех объявлений c пагинацией
+app.get("/items", (req, res) => {
+	let { page = 1, limit = 5 } = req.query;
+
+	const paginatedItems = paginateItems(page, limit, items);
 
 	res.json({
 		items: paginatedItems,
@@ -187,6 +204,21 @@ app.get("/items", (req, res) => {
 		page,
 		totalPages: Math.ceil(items.length / limit),
 	});
+});
+
+// Поиск объявлений по называнию c пагинацией
+app.get("/items/search", (req, res) => {
+	const { name, page = 1, limit = 5 } = req.query;
+
+	if (!name) return res.status(400).json({ error: "Query parameter 'name' is required" });
+
+	const filteredItems = items.filter((item) =>
+		item.name.toLowerCase().includes(name.toLowerCase())
+	);
+
+	const paginatedItems = paginateItems(page, limit, filteredItems);
+
+	res.json({ items: paginatedItems, total: filteredItems.length });
 });
 
 // Получение объявления по его id

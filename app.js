@@ -9,7 +9,8 @@ const ItemTypes = {
 };
 
 const app = express();
-app.use(bodyParser.json());
+// Внимательно с размером тела запроса! Картинки в Base64 могут много весить!
+app.use(bodyParser.json({ limit: "10mb" }));
 
 // middleware для разрешения кросс-доменных запросов
 app.use(
@@ -22,7 +23,7 @@ app.use(
 let items = [
 	{
 		id: 9,
-		name: "Квартира в центре",
+		name: "Квартира",
 		description: "Просторная квартира в центре города",
 		location: "Москва",
 		type: "Недвижимость",
@@ -88,7 +89,7 @@ let items = [
 	},
 	{
 		id: 5,
-		name: "Haval H6 Квартира",
+		name: "Haval H6",
 		description: "Надежный автомобиль",
 		location: "Новосибирск",
 		type: "Авто",
@@ -192,12 +193,17 @@ const paginateItems = (page, limit, allItems) => {
 	return allItems.slice(startIndex, endIndex);
 };
 
+//Фильтрация объявлений по типу
+const filterItemsByType = (adTypeFilter, items) => {
+	return adTypeFilter ? items.filter((item) => item.type === adTypeFilter) : items;
+};
+
 // Получение всех объявлений c пагинацией
 app.get("/items", (req, res) => {
-	let { page = 1, limit = 5 } = req.query;
+	let { page = 1, limit = 5, adTypeFilter = null } = req.query;
 
-	const paginatedItems = paginateItems(page, limit, items);
-
+	const filteredItems = filterItemsByType(adTypeFilter, items);
+	const paginatedItems = paginateItems(page, limit, filteredItems);
 	res.json({
 		items: paginatedItems,
 		total: items.length,
@@ -206,16 +212,17 @@ app.get("/items", (req, res) => {
 	});
 });
 
-// Поиск объявлений по называнию c пагинацией
+// Поиск объявлений по называнию c пагинацией и фильтрацией
 app.get("/items/search", (req, res) => {
-	const { name, page = 1, limit = 5 } = req.query;
+	const { name, page = 1, limit = 5, adTypeFilter = null } = req.query;
 
 	if (!name) return res.status(400).json({ error: "Query parameter 'name' is required" });
 
-	const filteredItems = items.filter((item) =>
+	const searchedItems = items.filter((item) =>
 		item.name.toLowerCase().includes(name.toLowerCase())
 	);
 
+	const filteredItems = filterItemsByType(adTypeFilter, searchedItems);
 	const paginatedItems = paginateItems(page, limit, filteredItems);
 
 	res.json({ items: paginatedItems, total: filteredItems.length });

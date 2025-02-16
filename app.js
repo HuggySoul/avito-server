@@ -66,6 +66,39 @@ let items = [
 		price: 15000000,
 	},
 	{
+		id: 11,
+		name: "Квартира",
+		description: "Гараж лучше чем твоя квартира",
+		location: "Сочи",
+		type: "Недвижимость",
+		propertyType: "Гараж",
+		area: 300,
+		rooms: 5,
+		price: 150000000,
+	},
+	{
+		id: 12,
+		name: "Квартира",
+		description: "АЗЩЛщз уа цлуащз зц",
+		location: "Сочи",
+		type: "Недвижимость",
+		propertyType: "Апартаменты",
+		area: 200,
+		rooms: 3,
+		price: 13000000,
+	},
+	{
+		id: 13,
+		name: "Квартира",
+		description: "АЗЩЛщз уа цлуащз зц",
+		location: "Нижний новгород",
+		type: "Недвижимость",
+		propertyType: "Частный дом",
+		area: 200,
+		rooms: 3,
+		price: 13000000,
+	},
+	{
 		id: 1,
 		name: "Toyota Camry",
 		description: "Надежный автомобиль",
@@ -206,9 +239,9 @@ app.get("/items", (req, res) => {
 	const paginatedItems = paginateItems(page, limit, filteredItems);
 	res.json({
 		items: paginatedItems,
-		total: items.length,
+		total: filteredItems.length,
 		page,
-		totalPages: Math.ceil(items.length / limit),
+		totalPages: Math.ceil(filteredItems.length / limit),
 	});
 });
 
